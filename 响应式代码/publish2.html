@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布订阅模式</title>
+</head>
+<body>
+  <script>
+  /* 简单无循环列表的发布订阅模式 */
+  let eventEmitter = {
+    // 缓存列表
+    list: {},
+    // 订阅方法
+    on(event, fn) {
+      let _this = this;
+      _this.list[event] = fn;
+      return _this;
+    },
+    // 取消方法
+    off(event) {
+      let _this = this;
+      let fn = _this.list[event];
+      if (!fn) return false;
+      delete _this.list[event];
+      return _this;
+    },
+    // 只激活一次方法
+    once(event, fn) {
+      let _this = this;
+      function innerOff() {
+        _this.off(event);
+        fn.apply(_this, arguments);
+      };
+      _this.on(event, innerOff);
+      return _this;
+    },
+    // 发布方法
+    emit() {
+      let _this = this;
+      let fn = [].shift.call(arguments), context = [].shift.call(arguments);
+      if (!_this.list[fn] || !context) return false;
+      _this.list[fn](context);
+      return _this;
+    }
+  };
+
+  eventEmitter.once('click', function (context) {
+    console.log(context);
+  })
+
+  eventEmitter.emit('click', '执行');
+  // eventEmitter.off('click');
+  eventEmitter.emit('click', '执行2');
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <script>
+    // let x;
+    // let y;
+    // let f = n => n * 100 + 100;
+
+    let active;
+    let watch = function (cb) {
+      active = cb;
+      active();
+      active = null;
+    };
+
+    let queue = [];
+    let nextTick = cb => {
+      return Promise.resolve().then(cb);
+    };
+
+    let queueJob = dep => {
+      if (!queue.includes(dep)) {
+        queue.push(dep);
+        nextTick(flushJobs);
+      }
+    };
+
+    let flushJobs = () => {
+      let job;
+      while (queue.length > 0) {
+        job = queue.shift();
+        job && job();
+      }
+    };
+
+    class Dep {
+      deps = new Set();
+      depend() {
+        if (active) {
+          this.deps.add(active);
+        }
+      };
+      notify() {
+        this.deps.forEach(dep => queueJob(dep));
+      };
+    };
+
+    ref = initValue => {
+      let value = initValue;
+      let dep = new Dep();
+      return Object.defineProperty({}, 'value', {
+        get() {
+          dep.depend();
+          return value;
+        },
+        set(newValue) {
+          value = newValue;
+          dep.notify();
+        }
+      });
+    };
+
+    let x = ref('x');
+    let y = ref('y');
+    let z = ref('z');
+
+    let str;
+    watch(() => {
+      str = `hello,${x.value} ${y.value} ${z.value}<br/>`;
+      console.log(1, str);
+      document.write(str);
+    });
+
+    x.value = 'xx';
+    y.value = 'yy';
+    z.value = 'zz';
+
+    // nextTick(() => {
+    //   console.log(x.value);
+    //   console.log(2, str);
+    //   console.log(x.value);
+    // });
+  </script>
+</body>
+
+</html>
