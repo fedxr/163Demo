@@ -2,3 +2,4 @@
 /mockjs/node_modules
 /NodeDemo/NODE-CLI/node_modules
 /Nodejs/**/node_modules
+/TypeScript/**/node_modules
